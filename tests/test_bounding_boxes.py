@@ -12,6 +12,7 @@ from src.bounding_boxes import (
     _replace_roof_colors,
     find_roof_boxes,
 )
+from src.utils import load_image
 
 
 @dataclass
@@ -125,6 +126,7 @@ def test_replace_roof_colors_with_similar_colors():
 
 
 def test_find_roof_boxes():
-    image, bboxes = find_roof_boxes("data/street_map.png")
+    image = load_image("data/street_map.png")
+    image, bboxes = find_roof_boxes(image)
     assert len(image.shape) == 3
     assert len(bboxes) >= 51
