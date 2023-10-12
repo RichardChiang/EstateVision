@@ -5,12 +5,35 @@ from skimage import feature, filters, io, measure
 from skimage.color import rgb2gray
 
 
-def _filter_regions(regions, min_area=200):
+def _filter_small_regions(regions, min_area=500):
     """
-    Filters out regions that are too small. Minimum area defaults to 200 to avoid
-    noise from capturing sheds, small roofs and road objects.
+    Removes regions that are too small or have unrealistic dimensions. Minimum area
+    defaults to avoid noise from capturing sheds, small roofs and road objects.
     """
-    return [region for region in regions if region.area >= min_area]
+    return [region for region in regions if region.area_bbox >= min_area]
+
+
+def _filter_border_regions(regions, image, buffer=5):
+    """
+    Removes regions that are too close to the edge of the image. Removes regions cut
+    off by the edge of the image.
+    """
+    return [
+        region
+        for region in regions
+        if region.bbox[0] > buffer
+        and region.bbox[1] > buffer
+        and region.bbox[2] < image.shape[0] - buffer
+        and region.bbox[3] < image.shape[1] - buffer
+    ]
+
+
+def _filter_google_maps_logo(regions, image):
+    """
+    Removes regions that overlap with the bottom of the image because copyright logo is
+    often placed there.
+    """
+    return [region for region in regions if region.bbox[2] < image.shape[1] - 100]
 
 
 def _get_roof_color(gray_image):
@@ -55,7 +78,7 @@ def find_roof_boxes(image_path):
     )
 
     # smooth edges
-    edges = filters.gaussian(gray_image, sigma=1)
+    edges = filters.gaussian(gray_image, sigma=10)
 
     # Apply Canny edge detection
     edges = feature.canny(edges, sigma=1)
@@ -63,8 +86,10 @@ def find_roof_boxes(image_path):
     # Join overlapping edges
     regions = measure.regionprops(measure.label(edges))
 
-    # Filter out regions that are too small
-    filtered_regions = _filter_regions(regions)
+    # Filter out invalid regions
+    filtered_regions = _filter_small_regions(regions)
+    filtered_regions = _filter_border_regions(filtered_regions, image)
+    filtered_regions = _filter_google_maps_logo(filtered_regions, image)
 
     # Get bounding boxes
     bboxes = [region.bbox for region in filtered_regions]
