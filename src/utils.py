@@ -1,6 +1,14 @@
 from matplotlib import pyplot as plt
+from skimage import io
 
 N_COLS = 5
+
+
+def load_image(image_path: str):
+    """
+    Loads image with skimage.
+    """
+    return io.imread(image_path)
 
 
 def display_image(image):
@@ -9,10 +17,13 @@ def display_image(image):
     plt.show()
 
 
-def display_multiple_images(images, n_cols=N_COLS, fig_size=3):
+def display_multiple_images(images, labels=None, n_cols=N_COLS, fig_size=3):
     """
     Displays variable length of images in a grid with matplotlib.
     """
+    if not labels:
+        labels = [None] * len(images)
+
     if len(images) == 1:
         display_image(images[0])
 
@@ -28,6 +39,7 @@ def display_multiple_images(images, n_cols=N_COLS, fig_size=3):
 
     for i, image in enumerate(images):
         ax = axes[i // n_cols, i % n_cols] if n_rows > 1 else axes[i]
+        ax.set_title(labels[i])
         ax.imshow(image, cmap="gray")
         ax.set_axis_off()
 

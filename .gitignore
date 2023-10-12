@@ -1,4 +1,12 @@
-/data/roof_images/*
+# keep folder
+!/data/roof_images/
+!/data/static_maps/
+
+# don't keep images
+/data/roof_images/*.jpg
+/data/roof_images/*.png
+/data/static_maps/*.jpg
+/data/static_maps/*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

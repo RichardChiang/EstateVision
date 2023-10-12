@@ -1,7 +1,7 @@
 from collections import Counter
 
 from matplotlib import pyplot as plt
-from skimage import feature, filters, io, measure
+from skimage import feature, filters, measure
 from skimage.color import rgb2gray
 
 
@@ -58,19 +58,10 @@ def _replace_roof_colors(image, house_color, epsilon=0.0001):
     return image
 
 
-def load_image(image_path):
-    """
-    Loads image with skimage.
-    """
-    return io.imread(image_path)
-
-
-def find_roof_boxes(image_path):
+def find_roof_boxes(image):
     """
     Finds the bounding boxes around the houses in the image.
     """
-    image = load_image(image_path)
-
     gray_image = rgb2gray(image)
     gray_image = _replace_roof_colors(
         gray_image,

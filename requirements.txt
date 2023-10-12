@@ -16,6 +16,9 @@ coverage==7.1.0
 # Precommit
 pre-commit==3.3.2
 
+# Environment
+python-dotenv==1.0.0
+
 # Application
 scikit-image==0.22.0
 numpy==1.26.0
