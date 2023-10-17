@@ -1,3 +1,5 @@
+[![Estate Vision Tests](https://github.com/RichardChiang/EstateVision/actions/workflows/pytest-tests.yml/badge.svg?branch=main)](https://github.com/RichardChiang/EstateVision/actions/workflows/pytest-tests.yml)
+
 # EstateVision
 EstateVision is a powerful tool for extracting valuable insights from the world of real estate.
 
