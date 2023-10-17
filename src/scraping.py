@@ -42,11 +42,19 @@ class GoogleMapsScraper:
         self.requests = requests
         self.filesystem = filesystem
 
+    @classmethod
     def _generate_filename(self, map_type: MapType, lat: float, lon: float):
         """
         Generate a unique filename for the map image.
         """
         return f"{map_type.value}_{lat}_{lon}.png"
+
+    @classmethod
+    def _filename_parser_regex(self):
+        """
+        Generate a regex that can parse filenames from _generate_filename.
+        """
+        return r"([-+]?\d+\.\d+)_([-+]?\d+\.\d+)"
 
     def _create_params(self, map_type: MapType, lat: float, lon: float):
         """
@@ -62,7 +70,7 @@ class GoogleMapsScraper:
             "key": self.api_key,
         }
 
-    def get_map_image(
+    def scrape_map_image(
         self,
         map_type: MapType,
         lat: float,

@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 import pytest
@@ -59,6 +60,21 @@ def test_scraper_generate_filename():
     assert filename == "satellite_0_-12.3.png"
 
 
+@pytest.mark.parametrize(
+    ("lat", "lon"),
+    [
+        (41.01, -12.23),
+        (-30.12345, 40.223),
+        (35.1, -180.00),
+    ],
+)
+def test_filename_generated_parseable_by_own_regex(lat, lon):
+    scraper = GoogleMapsScraper("API_KEY", None, None, None)
+    filename = scraper._generate_filename(MapType.STREET, lat, lon)
+    regex = scraper._filename_parser_regex()
+    assert [float(match) for match in re.search(regex, filename).groups()] == [lat, lon]
+
+
 def test_scraper_makes_proper_get_request(requests, filesystem):
     requests.set_responses(
         [
@@ -67,8 +83,8 @@ def test_scraper_makes_proper_get_request(requests, filesystem):
         ]
     )
     scraper = GoogleMapsScraper("API_KEY", "data", requests, filesystem)
-    scraper.get_map_image(MapType.STREET, 41, -12)
-    scraper.get_map_image(MapType.SATELLITE, 0, -12.3)
+    scraper.scrape_map_image(MapType.STREET, 41, -12)
+    scraper.scrape_map_image(MapType.SATELLITE, 0, -12.3)
     assert len(requests.prev_requests) == 2
     assert requests.prev_params == [
         scraper._create_params(MapType.STREET, 41, -12),
@@ -79,13 +95,13 @@ def test_scraper_makes_proper_get_request(requests, filesystem):
 def test_scraper_handles_errored_request(requests, filesystem):
     requests.set_responses([FakeResponse(status_code=404, content=b"")])
     scraper = GoogleMapsScraper("API_KEY", "data", requests, filesystem)
-    filename = scraper.get_map_image(MapType.STREET, 41, -12)
+    filename = scraper.scrape_map_image(MapType.STREET, 41, -12)
     assert filename is None
 
 
 def test_scraper_handles_successful_request(requests, filesystem):
     requests.set_responses([FakeResponse(status_code=200, content=b"")])
     scraper = GoogleMapsScraper("API_KEY", "data", requests, filesystem)
-    filename = scraper.get_map_image(MapType.STREET, 41, -12)
+    filename = scraper.scrape_map_image(MapType.STREET, 41, -12)
     print(filename)
     assert filename is not None
